@@ -1,5 +1,6 @@
 # World Cup Model
 
+![FIFA World Cup 2026 predicted knockout bracket, with Monte-Carlo title probabilities](_processed_outputs/worldcup/bracket_2026_share.png)
 
 A calibrated machine-learning model for the FIFA World Cup. It rates national
 teams from forward-in-time **Elo** and **EA FC / FIFA squad strength**, fits a
