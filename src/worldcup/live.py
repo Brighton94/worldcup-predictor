@@ -1,17 +1,4 @@
-"""Live in-tournament update: fold played 2026 results into Elo + the bracket.
-
-As World Cup matches finish, football-data.org reports the scores. This module:
-1. fetches the played 2026 results (and caches them),
-2. appends them to the international history and recomputes Elo (so ratings
-   reflect what's happened),
-3. uses the confirmed-squad strength table (``squads``) instead of the
-   nationality-pool proxy,
-4. locks the played group games into the forecast (real points, not simulated)
-   and re-runs the Monte-Carlo bracket on what's left,
-5. writes updated outputs and renders a "LIVE" bracket poster.
-
-    python -m src.worldcup.live              # refresh results and re-forecast
-"""
+"""Live in-tournament update: fold played 2026 results into Elo + the bracket."""
 
 from __future__ import annotations
 

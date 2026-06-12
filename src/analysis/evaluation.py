@@ -1,31 +1,4 @@
-"""Probabilistic forecast evaluation for 1X2 football predictions.
-
-References
-----------
-Wheatcroft, E. (2021), "Evaluating probabilistic forecasts of football
-matches: the case against the ranked probability score", JQAS 17(4).
-
-Why these metrics, in this order
---------------------------------
-The repository's CLAUDE.md prescribes multi-class log-loss as the
-primary metric and Brier as secondary. Wheatcroft argues that the
-Ignorance score (which is exactly multi-class log-loss with log base 2)
-dominates RPS in football contexts. This module reports log-loss,
-Brier, RPS, and accuracy together so reports can compare against the
-literature without re-implementing each one.
-
-Baselines
----------
-Two baselines per the CLAUDE.md spec:
-
-1. Home-win prior  -- predict the empirical class prior every match.
-2. Bookmaker-implied -- decimal odds -> implied probabilities with the
-   overround removed proportionally (the simplest, most-cited
-   normalisation; see Strumbelj 2014 for alternatives).
-
-The ``evaluate`` helper compares any candidate probability matrix
-against these baselines on the same rows.
-"""
+"""Probabilistic forecast evaluation for 1X2 football predictions."""
 
 from __future__ import annotations
 
@@ -38,7 +11,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-# ── Class labels ─────────────────────────────────────────────────────
+# Class labels
 
 
 CLASS_ORDER = ("home_win", "draw", "away_win")
@@ -51,14 +24,11 @@ def result_to_y(results: pd.Series | np.ndarray) -> np.ndarray:
     return np.vectorize(RESULT_TO_INDEX.__getitem__)(arr)
 
 
-# ── Scoring rules ────────────────────────────────────────────────────
+# Scoring rules
 
 
 def log_loss(proba: np.ndarray, y: np.ndarray, eps: float = 1e-12) -> float:
-    """Multi-class log-loss in nats (natural log).
-
-    The CLAUDE.md spec names this as the primary metric.
-    """
+    """Multi-class log-loss in nats (natural log)."""
     proba = np.clip(np.asarray(proba, dtype=float), eps, 1.0)
     return float(-np.mean(np.log(proba[np.arange(len(y)), y])))
 
@@ -72,11 +42,7 @@ def brier_multiclass(proba: np.ndarray, y: np.ndarray) -> float:
 
 
 def ranked_probability_score(proba: np.ndarray, y: np.ndarray) -> float:
-    """Three-class RPS using the ordinal H < D < A convention.
-
-    Reported alongside log-loss for comparability with the literature.
-    Wheatcroft (2021) argues log-loss should be preferred.
-    """
+    """Three-class RPS using the ordinal H < D < A convention."""
     proba = np.asarray(proba, dtype=float)
     cum_pred = np.cumsum(proba, axis=1)
     one_hot = np.zeros_like(proba)
@@ -91,7 +57,7 @@ def accuracy(proba: np.ndarray, y: np.ndarray) -> float:
     return float((np.argmax(np.asarray(proba), axis=1) == y).mean())
 
 
-# ── Bookmaker baseline ───────────────────────────────────────────────
+# Bookmaker baseline
 
 
 def odds_to_proba(
@@ -99,13 +65,7 @@ def odds_to_proba(
     odds_draw: np.ndarray,
     odds_away: np.ndarray,
 ) -> np.ndarray:
-    """Convert decimal odds to probabilities, removing the overround.
-
-    Uses proportional normalisation: divide each 1/odds by the row sum.
-    Returns an (n, 3) array with columns in CLASS_ORDER. Rows containing
-    any non-positive or NaN odds are returned as NaN so the caller can
-    decide how to handle them.
-    """
+    """Convert decimal odds to probabilities, removing the overround."""
     arr = np.column_stack([odds_home, odds_draw, odds_away]).astype(float)
     with np.errstate(divide="ignore", invalid="ignore"):
         raw = 1.0 / arr
@@ -117,7 +77,7 @@ def odds_to_proba(
     return normalised
 
 
-# ── Reliability curves ───────────────────────────────────────────────
+# Reliability curves
 
 
 def reliability_curve(
@@ -126,10 +86,7 @@ def reliability_curve(
     class_index: int,
     n_bins: int = 10,
 ) -> pd.DataFrame:
-    """Reliability data for a single class.
-
-    Returns columns: bin_lower, bin_upper, n, mean_predicted, frac_positive.
-    """
+    """Reliability data for a single class."""
     p = np.asarray(proba)[:, class_index]
     is_pos = (y == class_index).astype(int)
     edges = np.linspace(0.0, 1.0, n_bins + 1)
@@ -149,7 +106,7 @@ def reliability_curve(
     return pd.DataFrame(out)
 
 
-# ── End-to-end evaluation ────────────────────────────────────────────
+# End-to-end evaluation
 
 
 @dataclass
@@ -199,11 +156,7 @@ def class_prior_proba(y_train: np.ndarray, n_rows: int) -> np.ndarray:
 
 
 def home_win_baseline(n_rows: int) -> np.ndarray:
-    """Trivial 'home wins every match' baseline (probability 1.0 on H).
-
-    Reported to anchor log-loss against a strawman; expect it to lose
-    badly because it gives zero probability to draws and away wins.
-    """
+    """Trivial 'home wins every match' baseline (probability 1.0 on H)."""
     base = np.full((n_rows, 3), 1e-3)
     base[:, 0] = 1.0 - 2e-3
     return base

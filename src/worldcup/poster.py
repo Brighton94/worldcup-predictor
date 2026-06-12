@@ -1,15 +1,4 @@
-"""Render a social-media-ready PNG of the predicted 2026 bracket.
-
-Builds a self-contained poster SVG (title band, bracket with embedded flag
-images, trophy, champion banner, title-probability panel, and a prediction-date
-stamp) and rasterises it to PNG with cairosvg. Flags are baked in as images so
-they render on every platform. The poster uses its own large-format geometry
-(bigger boxes and fonts than the on-screen widget) so it reads well when shared.
-
-    python -m src.worldcup.poster --date "9 June 2026" --handle "@brighton_nkomo_"
-
-Requires: cairosvg, and flag PNGs in data/raw/flags/ (downloaded from flagcdn).
-"""
+"""Render a social-media-ready PNG of the predicted 2026 bracket."""
 
 from __future__ import annotations
 
@@ -27,7 +16,7 @@ from .worldcup2026 import R16, QF, SF, FINAL
 
 warnings.filterwarnings("ignore")
 
-# ── Large-format poster geometry ─────────────────────────────────────
+# Large-format poster geometry
 PW = 3000
 BW, MH = 292, 80
 COLX_L = [60, 380, 700, 1020]                      # R32, R16, QF, SF
@@ -191,8 +180,20 @@ def build_poster(date_str: str, handle: str = "", bracket_csv=None, sim_csv=None
         f'{_esc(title_text or "FIFA World Cup 2026: Predicted Knockout Bracket")}</text>'
         f'<text x="{XC:.0f}" y="130" font-size="32" fill="#737a88" text-anchor="middle">'
         f'{_esc(subtitle_text or "A machine-learning forecast, simulated through the official 48-team knockout bracket.")}</text>{stamp}')
-    foot = (f'<text x="{PW - 70:.0f}" y="{PH + TH - 36:.0f}" font-size="30" font-weight="700" '
-            f'fill="#C9A227" text-anchor="end">{_esc(handle)}</text>' if handle else "")
+    if handle:
+        fy = PH + TH - 36
+        rx = PW - 70                     # right margin of the footer
+        sz = 30                          # X logo box size
+        ix = rx - sz                     # X logo flush at the right margin
+        iy = fy - sz + 4                 # align the icon with the text cap height
+        x_icon = (f'<g transform="translate({ix:.0f},{iy:.0f}) scale({sz / 24:.3f})">'
+                  '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817'
+                  'L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52'
+                  'h1.833L7.084 4.126H5.117z" fill="#C9A227"/></g>')
+        foot = (f'<text x="{rx - sz - 12:.0f}" y="{fy:.0f}" font-size="30" font-weight="700" '
+                f'fill="#C9A227" text-anchor="end">{_esc(handle)}</text>' + x_icon)
+    else:
+        foot = ""
 
     return (
         f'<svg viewBox="0 0 {PW} {PH + TH}" xmlns="http://www.w3.org/2000/svg" '

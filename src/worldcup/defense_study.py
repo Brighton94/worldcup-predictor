@@ -1,32 +1,4 @@
-"""Backtest: does a strong defence (GK + defenders) win tournaments?
-
-The folk claim is "defence wins titles". Tested naively it is confounded:
-strong teams are strong everywhere, so a good defence correlates with success
-only because good teams have good defenders *and* good attackers. The honest
-question is whether defensive strength predicts tournament success *beyond*
-overall squad strength -- i.e. do defence-tilted teams over-perform their
-overall rating?
-
-We assemble every major men's international tournament since 2017 (the first
-FIFA edition with national coverage in ``data/raw/fifa``): World Cup, UEFA Euro,
-Copa America, Africa Cup of Nations, AFC Asian Cup, Gold Cup. For each
-participating team we measure:
-
-* outcome   -- points-per-game across that tournament (stage-agnostic), plus
-               finalist / champion flags;
-* def_line  -- a defensive-line rating = blend of the best GK and the top-5
-               defenders from the FIFA edition active at kickoff
-               ((gk + 5 * def_top) / 6, i.e. one keeper plus five defenders);
-* overall   -- ovr_top23 (the whole-squad strength control);
-* def_tilt  -- def_line - overall  (how defence-skewed a squad is);
-* att_tilt  -- att_top  - overall  (the attacking contrast).
-
-Ratings come from the nationality-pool edition tables (``edition_table_filled``)
-so the metric is available for past tournaments, where confirmed squads do not
-exist. Everything uses the edition active strictly before kickoff -- no leak.
-
-    python -m src.worldcup.defense_study
-"""
+"""Backtest: does a strong defence (GK + defenders) win tournaments?"""
 
 from __future__ import annotations
 

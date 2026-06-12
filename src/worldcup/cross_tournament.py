@@ -1,19 +1,4 @@
-"""Continental-tournament signal: form features + the correlation study.
-
-Two related uses, per the project plan:
-
-1. ``team_form_features`` -- pre-tournament form metrics (recent competitive
-   points-per-game and most-recent continental-campaign performance) attached
-   to each team for a World Cup, strictly from matches before kickoff.
-
-2. ``cross_tournament_panel`` / ``analyse_correlation`` -- the standalone
-   study: does a team's continental-tournament form (Euro, Copa America, etc.)
-   predict its subsequent World Cup performance? Reported before the features
-   are trusted in the model.
-
-All look-ups are time-bounded to before the relevant World Cup, so nothing
-here can leak.
-"""
+"""Continental-tournament signal: form features + the correlation study."""
 
 from __future__ import annotations
 
@@ -27,7 +12,7 @@ from .elo import compute_elo, ratings_as_of
 PTS = {"win": 3.0, "draw": 1.0, "loss": 0.0}
 
 
-# ── team-centric helpers over the international-results table ─────────
+# team-centric helpers over the international-results table
 
 
 def _team_matches(results: pd.DataFrame, team: str, before: pd.Timestamp) -> pd.DataFrame:
@@ -78,16 +63,11 @@ def team_form_features(team: str, before: pd.Timestamp,
     }
 
 
-# ── correlation study ────────────────────────────────────────────────
+# correlation study
 
 
 def cross_tournament_panel(min_year: int = 1998) -> pd.DataFrame:
-    """One row per (World Cup, team): WC performance vs prior continental form.
-
-    WC performance is points-per-game across the team's regulation World Cup
-    results (a clean, stage-agnostic measure). Prior continental form is the
-    team's most-recent continental-campaign ppg before the World Cup started.
-    """
+    """One row per (World Cup, team): WC performance vs prior continental form."""
     results = load_intl_results()
     results_elo = compute_elo(results)
     wc = load_wc_matches()

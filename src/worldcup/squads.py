@@ -1,18 +1,4 @@
-"""Confirmed-squad strength from the official 26-man World Cup squads.
-
-football-data.org's /competitions/WC/teams returns each nation's confirmed
-26-man squad. We match those players to their EA FC 26 ratings (by name, within
-the same nation) and compute a squad-strength table from the *actual called-up
-players* -- a sharper signal than the "top-23 by nationality" pool.
-
-EA FC does not rate enough players for several nations (Iran, Qatar, Egypt,
-Uzbekistan, Jordan, Curacao, Panama, Cape Verde, South Africa), so a team whose
-squad matches too few EA ratings falls back to the nationality-pool proxy
-(``edition_table_filled``). This keeps every team covered without inventing
-ratings.
-
-    python -m src.worldcup.squads        # prints per-team match rates
-"""
+"""Confirmed-squad strength from the official 26-man World Cup squads."""
 
 from __future__ import annotations
 
@@ -82,8 +68,7 @@ def _strength_from_players(players: list[tuple[float, str]]) -> dict:
         return sum(vals) / len(vals) if vals else float("nan")
 
     def best_xi(n=11, max_gk=1):
-        """Top-n by overall, but no more than ``max_gk`` keepers (a real XI
-        starts one goalkeeper, not the two highest-rated keepers)."""
+        """Top-n by overall, but no more than ``max_gk`` keepers (a real XI"""
         chosen, gk = [], 0
         for o, g in sorted(players, key=lambda x: -x[0]):
             if g == "GK":
@@ -107,11 +92,7 @@ def _strength_from_players(players: list[tuple[float, str]]) -> dict:
 
 
 def confirmed_strength_table():
-    """Squad-strength table for the 48 WC teams (confirmed squads, proxy fallback).
-
-    Returns (DataFrame indexed by canonical team with the ``_STRENGTH`` columns,
-    report DataFrame of per-team match counts and which source was used).
-    """
+    """Squad-strength table for the 48 WC teams (confirmed squads, proxy fallback)."""
     squads = load_squads()
     fc = pd.read_csv(C.RAW / "fifa" / "players_26.csv", low_memory=False)
     fc["_n"] = fc["Name"].map(_norm)
@@ -131,8 +112,7 @@ def confirmed_strength_table():
                 pn = _norm(name)
                 if not pn:
                     continue
-                # 1) exact surname match (handles "Cucurella" vs "Marc Cucurella"),
-                #    disambiguated by best full-name similarity when shared.
+                # exact surname match, disambiguated by best full-name similarity.
                 sn = pn.split()[-1]
                 same = [i for i, s in enumerate(surn) if s == sn]
                 if same:

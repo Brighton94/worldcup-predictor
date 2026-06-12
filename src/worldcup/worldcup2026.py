@@ -1,28 +1,4 @@
-"""Predict the 2026 World Cup (first 48-team edition).
-
-Data note
----------
-The 2026 squad-strength edition is FIFA 22 (``config.active_edition`` returns
-2022 for any 2026 date): no EA FC 23-26 dataset with full national coverage is
-available from open mirrors without Kaggle authentication. The dominant signal,
-Elo, is current to June 2026 (it absorbs every qualifier), so the forecast is
-driven mostly by up-to-date results with squad strength as a secondary, slightly
-stale feature. Drop ``players_23..26.csv`` (sofifa schema) into ``data/raw/fifa``
-and register them in ``config`` to upgrade the squad signal.
-
-Tournament structure
---------------------
-12 groups of 4. Top two per group plus the eight best third-placed teams reach
-the Round of 32. The exact knockout bracket (matches 73-104) and the eligibility
-of each third-placed slot are taken from the official FIFA regulations (Annex C).
-The group draw is reconstructed from the official fixture list.
-
-Outputs
--------
-Deterministic "most likely" bracket (chalk: the higher win-probability team
-advances at every tie) for the tree, plus Monte-Carlo round-advancement and
-title probabilities for context. No scorelines are produced.
-"""
+"""Predict the 2026 World Cup (first 48-team edition)."""
 
 from __future__ import annotations
 
@@ -50,10 +26,7 @@ def _canon(name: str) -> str:
     return _TEAM_ALIASES.get(name, name)
 
 
-# ── Official 2026 knockout bracket (FIFA regulations) ────────────────
-# Round of 32: winner/runner-up slots are fixed; third-placed slots list the
-# groups eligible to fill them (resolved per Annex C from the actual thirds).
-# Slot codes: ("1","A")=winner A, ("2","B")=runner-up B, ("3", {groups})=a third.
+# Official 2026 knockout bracket (FIFA): fixed R32 slots; thirds resolved per Annex C.
 R32 = {
     73: (("2", "A"), ("2", "B")),
     74: (("1", "E"), ("3", set("ABCDF"))),
@@ -81,18 +54,13 @@ FINAL = {104: (101, 102)}
 
 THIRD_SLOTS = [m for m, (a, b) in R32.items() if b[0] == "3"]
 
-# Order of the assignment columns in FIFA's Annex C table -> the R32 match each
-# fills (slots 1A,1B,1D,1E,1G,1I,1K,1L respectively).
+# Annex C assignment-column order -> the R32 match each fills (1A,1B,1D,1E,1G,1I,1K,1L).
 _ANNEX_SLOT_MATCH = [79, 85, 81, 74, 82, 77, 87, 80]
 
 
 @lru_cache(maxsize=1)
 def _annex_c() -> dict:
-    """FIFA Annex C: frozenset(8 third-placed groups) -> {match_id: group_letter}.
-
-    The official mapping of which third-placed team fills which Round-of-32 slot
-    for each of the 495 possible combinations of qualifying third-placed teams.
-    """
+    """FIFA Annex C: frozenset(8 third-placed groups) -> {match_id: group_letter}."""
     table = {}
     for ln in open(C.WC_RAW / "annex_c_raw.txt"):
         toks = [x.strip().lstrip("3") for x in ln.strip().split(";") if x.strip()]
@@ -103,12 +71,7 @@ def _annex_c() -> dict:
     return table
 
 
-# ── Group draw (reconstructed from the official fixture list) ─────────
-
-# Official 2026 group lettering (FIFA final draw, canonical team names). The
-# fixture list gives correct group *memberships*, but the knockout slot map
-# (Annex C / matches 73-88) is keyed to FIFA's official group *letters*, so the
-# reconstructed groups must be labelled to match the draw, not alphabetically.
+# Official 2026 group lettering (canonical names), labelled to match the FIFA draw, not alphabetically.
 OFFICIAL_GROUPS_2026 = {
     "A": {"Mexico", "South Africa", "South Korea", "Czechia"},
     "B": {"Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"},
@@ -126,13 +89,7 @@ OFFICIAL_GROUPS_2026 = {
 
 
 def load_groups_2026() -> dict[str, list[str]]:
-    """Reconstruct the 12 groups from the 72 group-stage fixtures.
-
-    Read from the raw fixture list (not ``load_intl_results``, which drops the
-    future, still-scoreless 2026 matches). Teams in the same group play a full
-    round robin, so the graph of "played each other in the group stage" has
-    exactly the 12 groups as its connected components.
-    """
+    """Reconstruct the 12 groups from the 72 group-stage fixtures."""
     results = pd.read_csv(C.INTL_RAW / "results.csv")
     results["date"] = pd.to_datetime(results["date"])
     wc = results[(results["tournament"] == "FIFA World Cup")
@@ -171,7 +128,7 @@ def load_groups_2026() -> dict[str, list[str]]:
     return {chr(65 + i): c for i, c in enumerate(comps)}
 
 
-# ── Pairwise probabilities from the fitted model ─────────────────────
+# Pairwise probabilities from the fitted model
 
 
 def pairwise_probs(model, teams, tbl, elo, hosts) -> dict:
@@ -192,13 +149,7 @@ def pairwise_probs(model, teams, tbl, elo, hosts) -> dict:
 
 
 def _assign_thirds(third_by_group: dict[str, str]) -> dict[int, str]:
-    """Assign the 8 qualifying thirds to the 8 third-slots via FIFA's Annex C.
-
-    Looks up the official slot mapping for this exact set of qualifying third-
-    placed groups. Falls back to an eligibility-respecting matching only if a
-    combination is somehow absent from the table (it never should be -- all 495
-    are present).
-    """
+    """Assign the 8 qualifying thirds to the 8 third-slots via FIFA's Annex C."""
     annex = _annex_c().get(frozenset(third_by_group))
     if annex is not None:
         return {m: third_by_group[g] for m, g in annex.items()}
@@ -220,19 +171,11 @@ def _assign_thirds(third_by_group: dict[str, str]) -> dict[int, str]:
     return bt(0, set()) or {}
 
 
-# ── Deterministic "most likely" bracket ──────────────────────────────
+# Deterministic "most likely" bracket
 
 
 def predict_bracket(model, groups, tbl, elo, hosts, played=None) -> tuple[dict, dict, list]:
-    """Chalk bracket: expected group order, then higher win-prob advances.
-
-    ``played`` (optional) maps ``frozenset({teamA, teamB}) -> {team: points}`` for
-    group games already played, whose real points replace the expected points.
-
-    Returns (bracket, group_table, qualified_thirds_meta) where ``bracket`` maps
-    each match id to ``(team_a, team_b, winner)`` and ``group_table`` maps each
-    group letter to its predicted 1st/2nd/3rd/4th order.
-    """
+    """Chalk bracket: expected group order, then higher win-prob advances."""
     teams = [t for g in groups.values() for t in g]
     pw = pairwise_probs(model, teams, tbl, elo, hosts)
 
@@ -271,7 +214,7 @@ def predict_bracket(model, groups, tbl, elo, hosts, played=None) -> tuple[dict, 
     return bracket, group_table, best
 
 
-# ── Monte-Carlo title / round probabilities ──────────────────────────
+# Monte-Carlo title / round probabilities
 
 
 def simulate(model, groups, tbl, elo, hosts, n_sims=20000, seed=7, played=None) -> pd.DataFrame:
@@ -334,19 +277,12 @@ def simulate(model, groups, tbl, elo, hosts, n_sims=20000, seed=7, played=None) 
     return df.sort_values("Champion", ascending=False).reset_index()
 
 
-# ── Orchestration ────────────────────────────────────────────────────
+# Orchestration
 
 
 def build_2026(n_sims: int = 20000, squad_table=None, results_elo=None,
                as_of_date=None, played=None):
-    """Build the 2026 forecast.
-
-    Optional live-mode args: ``squad_table`` (e.g. confirmed-squad strength),
-    ``results_elo`` (Elo results that already include played WC games),
-    ``as_of_date`` (snapshot date for ratings, after the played games), and
-    ``played`` (group results to lock in). Defaults reproduce the pre-tournament
-    forecast.
-    """
+    """Build the 2026 forecast."""
     if results_elo is None:
         results_elo = compute_elo(load_intl_results())
     groups = load_groups_2026()

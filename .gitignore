@@ -1,5 +1,10 @@
 # Environment
 .env
+.env.*
+.venv/
+venv/
+ENV/
+.python-version
 
 # Python
 __pycache__/
@@ -8,6 +13,12 @@ __pycache__/
 dist/
 build/
 .ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+site/
 
 # Cache
 .cache/
@@ -15,6 +26,11 @@ build/
 
 # OS
 .DS_Store
+
+# Editors
+.idea/
+*.swp
+*.swo
 
 # FIFA / EA FC player ratings: large and Kaggle-licensed, do not commit.
 # See data/raw/fifa/README.md for how to obtain them.
@@ -24,3 +40,8 @@ data/raw/fifa/
 # any local scratch CSV/PNG you do not intend to publish:
 # _processed_outputs/worldcup/scratch_*
 _build_nb.py
+_make_notebooks.py
+_processed_outputs/worldcup/_handle_crop.png
+notebooks/04_worldcup_report.ipynb
+AGENTS.md
+CLAUDE.md

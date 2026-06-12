@@ -1,12 +1,4 @@
-"""Country flag emojis for national teams.
-
-Uses the ``emoji-country-flag`` library (``import flag``) to convert ISO 3166
-codes into flag emojis, with a name->code map for the canonical team names used
-in this repo. England and Scotland use their subdivision flags (GB-ENG/GB-SCT).
-
-Flag emojis render as flags on macOS/iOS/Linux/Android; some Windows browsers
-show the two-letter code instead (an OS limitation, not a data problem).
-"""
+"""Country flag emojis for national teams."""
 
 from __future__ import annotations
 

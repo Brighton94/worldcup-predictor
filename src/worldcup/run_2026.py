@@ -1,13 +1,4 @@
-"""Build the 2026 World Cup forecast and render the predicted bracket tree.
-
-    python -m src.worldcup.run_2026 [--sims N]
-
-Outputs (in _processed_outputs/worldcup/):
-    predictions_2026_bracket.csv  every knockout match with predicted winner
-    simulation_2026.csv           per-team round-advancement and title odds
-    groups_2026.csv               predicted group order (1st-4th)
-    bracket_2026.html             self-contained visual tree (R32 -> winner)
-"""
+"""Build the 2026 World Cup forecast and render the predicted bracket tree."""
 
 from __future__ import annotations
 
@@ -41,9 +32,9 @@ def _bracket_rows(bracket: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-# ── HTML rendering ───────────────────────────────────────────────────
+# HTML rendering
 
-# ── SVG bracket geometry (symmetric, with connector lines) ───────────
+# SVG bracket geometry (symmetric, with connector lines)
 _W, _H = 1980, 1560
 _BW, _MH = 192, 48                       # match box width / height (two rows)
 _XC = _W / 2                             # centre
@@ -74,8 +65,7 @@ def _label(name: str) -> str:
 
 
 def _trophy_svg(cx: float, bottom: float, scale: float) -> str:
-    """Original detailed gold-trophy vector: globe on a twisting body with the
-    green malachite base bands. Drawn once, centred."""
+    """Original detailed gold-trophy vector: globe on a twisting body with the"""
     tx, ty = cx - 50 * scale, bottom - 150 * scale
     return (
         f'<g transform="translate({tx:.1f},{ty:.1f}) scale({scale:.3f})">'

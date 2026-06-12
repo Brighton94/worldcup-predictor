@@ -1,16 +1,4 @@
-"""End-to-end World Cup pipeline: features -> model -> baselines -> bracket.
-
-Run from the repo root:
-
-    python -m src.worldcup.run            # both 2018 and 2022
-    python -m src.worldcup.run --year 2022
-
-Outputs (CSV) are written to ``_processed_outputs/worldcup/``:
-    metrics_<year>.csv        model vs baselines on the held-out tournament
-    predictions_<year>.csv    per-match probabilities for the tournament
-    simulation_<year>.csv     per-team round-advancement and title odds
-    cross_tournament.csv      Euro/Copa-vs-World-Cup correlation study
-"""
+"""End-to-end World Cup pipeline: features -> model -> baselines -> bracket."""
 
 from __future__ import annotations
 

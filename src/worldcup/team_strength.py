@@ -1,15 +1,4 @@
-"""Per-nation squad strength from FIFA player ratings.
-
-For each (nationality, FIFA edition) the national-team pool is approximated by
-the top players of that nationality by ``overall`` (sofifa does not always tag
-actual call-ups consistently across editions, so a top-N pool is the robust
-proxy). Per-edition features are then combined across a World Cup cycle's
-editions with recency weights -- the edition closest to the tournament is the
-most predictive of the squad that will actually be selected.
-
-All features describe the squad as of a FIFA edition released *before* the
-tournament, so they are pre-kickoff by construction.
-"""
+"""Per-nation squad strength from FIFA player ratings."""
 
 from __future__ import annotations
 
@@ -65,12 +54,7 @@ def _edition_strength(players: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_team_strength(cycle_year: int) -> pd.DataFrame:
-    """Recency-weighted squad strength per nation for a World Cup cycle.
-
-    Editions are taken from ``config.CYCLE_EDITIONS[cycle_year]`` and combined
-    with weights proportional to (edition_year - min_edition + 1), so the most
-    recent edition dominates while earlier ones stabilise the estimate.
-    """
+    """Recency-weighted squad strength per nation for a World Cup cycle."""
     editions = C.CYCLE_EDITIONS[cycle_year]
     fifa = load_fifa_players()
     fifa = fifa[fifa["edition"].isin(editions)]

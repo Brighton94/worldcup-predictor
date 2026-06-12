@@ -1,19 +1,4 @@
-"""Assemble the match-level training matrix.
-
-A single representation is used for both the training backbone and the World
-Cup test set so there is no train/test feature shift:
-
-* **Backbone** -- every competitive international match in the covered window
-  (non-friendly, non-shootout) before the target World Cup. Each match is
-  enriched with the FIFA edition *active at its date* and pre-match Elo. This
-  yields thousands of rows rather than the ~64 World Cup matches alone.
-* **World Cup test** -- the matches of the target tournament, enriched with the
-  edition active at the tournament start and pre-tournament Elo.
-
-All model features are symmetric differences (team1 - team2) plus a signed
-``home_field`` term, so the model is orientation-invariant once the training
-set is mirrored (done in ``model``). Regulation target: H = 0, D = 1, A = 2.
-"""
+"""Assemble the match-level training matrix."""
 
 from __future__ import annotations
 
@@ -36,27 +21,14 @@ FEATURES = ["d_elo", "home_field"] + [f"d_{c}" for c in _STRENGTH]
 
 @lru_cache(maxsize=None)
 def _edition_table(edition: int) -> pd.DataFrame:
-    """Strength table for a single FIFA edition, indexed by canonical nation.
-
-    A weak nation may lack any player in a position group (e.g. no top-rated
-    goalkeeper), leaving that column NaN. Such gaps are themselves a sign of a
-    thin squad, so they are imputed with the edition's column median (a neutral
-    fill that avoids both NaNs and extreme values).
-    """
+    """Strength table for a single FIFA edition, indexed by canonical nation."""
     fifa = load_fifa_players()
     tbl = _edition_strength(fifa[fifa["edition"] == edition])
     return tbl.fillna(tbl.median(numeric_only=True))
 
 
 def edition_table_filled(edition: int) -> pd.DataFrame:
-    """Strength table for ``edition``, backfilling nations it omits.
-
-    Some editions drop national teams for licensing reasons (e.g. EA FC 26 has
-    no Brazil). Such a nation is not weak -- it is simply absent -- so its row is
-    pulled from the most recent earlier edition that still has it, rather than
-    being imputed as a thin squad. Only nations in no edition at all fall through
-    to the low-percentile imputation in ``strength_vector``.
-    """
+    """Strength table for ``edition``, backfilling nations it omits."""
     from .data import available_editions
 
     base = _edition_table(edition)
@@ -71,13 +43,7 @@ def edition_table_filled(edition: int) -> pd.DataFrame:
 
 
 def strength_vector(tbl: pd.DataFrame, team: str) -> pd.Series:
-    """Strength row for ``team``, imputing a thin-squad profile if absent.
-
-    Some nations have no FIFA representation at all (e.g. Qatar in 2022 -- the
-    domestic league is not in the game). Such teams are genuinely weak squads,
-    so they are given the edition's 10th-percentile profile rather than dropped,
-    keeping full tournament coverage. Their Elo (from real results) is unaffected.
-    """
+    """Strength row for ``team``, imputing a thin-squad profile if absent."""
     if team in tbl.index:
         return tbl.loc[team]
     return tbl[_STRENGTH].quantile(0.10)
@@ -148,11 +114,7 @@ def build_wc_test(wc_year: int, results_elo: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_dataset(wc_year: int) -> dict:
-    """Backbone (train) + World Cup (test) for a target tournament.
-
-    Returns a dict with ``train``, ``test`` DataFrames and the ``edition`` used
-    for the World Cup squad strength.
-    """
+    """Backbone (train) + World Cup (test) for a target tournament."""
     results_elo = compute_elo(load_intl_results())
     tours = load_tournaments().set_index("tournament_id")
     start = tours.loc[f"WC-{wc_year}", "start_date"]

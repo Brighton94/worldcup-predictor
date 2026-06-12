@@ -1,19 +1,4 @@
-"""Data loaders with a single canonical country naming.
-
-Three sources, joined on canonical country names:
-
-* World Cup structured data (jfjelstul) -- defines the matches to predict, the
-  bracket structure, and exact 90-minute labels (the extra-time flag lets us
-  recover the regulation result: a knockout that went to extra time was level
-  after 90, i.e. a draw).
-* International results (martj42) -- ~49k matches 1872-2026, the training
-  backbone and the source for Elo and continental-tournament form. Scores
-  include extra time, so penalty-shootout matches (separate file) are dropped
-  from clean-label training.
-* FIFA player ratings (sofifa) -- squad-strength enrichment per nation/edition.
-
-Target encoding (regulation, 90 min + stoppage): H = 0, D = 1, A = 2.
-"""
+"""Data loaders with a single canonical country naming."""
 
 from __future__ import annotations
 
@@ -26,16 +11,11 @@ from . import config as C
 RESULT_TO_IDX = {"H": 0, "D": 1, "A": 2}
 
 
-# ── World Cup structured data ────────────────────────────────────────
+# World Cup structured data
 
 
 def load_wc_matches(mens_only: bool = True) -> pd.DataFrame:
-    """World Cup matches with a leak-free regulation (90-min) result.
-
-    A knockout match with ``extra_time == 1`` was level after 90 minutes, so
-    its regulation result is a draw regardless of who advanced. Group matches
-    never go to extra time, so their recorded result is already regulation.
-    """
+    """World Cup matches with a leak-free regulation (90-min) result."""
     m = pd.read_csv(C.WC_RAW / "matches.csv", low_memory=False)
     if mens_only:
         m = m[m["tournament_name"].str.contains("Men's")].copy()
@@ -73,16 +53,11 @@ def host_country(tournament_id: int | str) -> str:
     return str(row.iloc[0]["host_country"])
 
 
-# ── International results (training backbone, Elo, form) ──────────────
+# International results (training backbone, Elo, form)
 
 
 def load_intl_results() -> pd.DataFrame:
-    """All international matches, canonicalised, with clean-label flags.
-
-    Columns added: ``team1``/``team2`` (canonical), ``is_friendly``,
-    ``is_shootout`` (went to penalties -> ambiguous regulation label),
-    ``result`` (H/D/A from the recorded score), ``y``.
-    """
+    """All international matches, canonicalised, with clean-label flags."""
     r = pd.read_csv(C.INTL_RAW / "results.csv")
     r["date"] = pd.to_datetime(r["date"])
     r = r.dropna(subset=["home_score", "away_score"]).copy()
@@ -91,8 +66,7 @@ def load_intl_results() -> pd.DataFrame:
     r["is_friendly"] = r["tournament"].eq("Friendly")
     r["neutral"] = r["neutral"].astype(str).str.upper().eq("TRUE")
 
-    # penalty-shootout matches: level after extra time -> regulation label
-    # is ambiguous from the score alone; flag them for exclusion.
+    # penalty-shootout matches: ambiguous regulation result, flagged for exclusion.
     s = pd.read_csv(C.INTL_RAW / "shootouts.csv")
     s["date"] = pd.to_datetime(s["date"])
     shootout_keys = set(
@@ -114,17 +88,14 @@ def load_intl_results() -> pd.DataFrame:
     return r.sort_values("date").reset_index(drop=True)
 
 
-# ── FIFA player ratings ──────────────────────────────────────────────
+# FIFA player ratings
 
 _FIFA_COLS = ["short_name", "overall", "potential", "age", "player_positions"]
 
 # Minimum distinct nationalities for a file to count as full national coverage.
-# Filters out club-only or top-leagues-only exports (e.g. a 30-nation EA FC 24
-# file) that would distort national-team strength.
 _MIN_NATIONS = 75
 
-# Map common column-name variants (lowercased) onto the canonical schema, so
-# whichever EA FC / FIFA export is dropped in is understood without edits.
+# Map column-name variants (lowercased) onto the canonical schema.
 _COL_VARIANTS = {
     "nationality": ["nationality_name", "nationality", "country_name", "nation", "country"],
     "overall": ["overall", "overall_rating", "ova", "ovr", "rating"],
@@ -159,13 +130,7 @@ def _normalise_fifa(df: pd.DataFrame) -> pd.DataFrame | None:
 
 @lru_cache(maxsize=1)
 def load_fifa_players() -> pd.DataFrame:
-    """All FIFA/EA FC editions stacked, with canonical ``nationality``/``edition``.
-
-    Robust to the different column namings used by the various sofifa and EA
-    Sports FC exports, and to latin-1 encoding. Files that are not player-rating
-    tables, or that lack full national coverage (``_MIN_NATIONS``), are skipped
-    so a partial export cannot corrupt the strength tables.
-    """
+    """All FIFA/EA FC editions stacked, with canonical ``nationality``/``edition``."""
     frames = []
     for path in sorted(C.FIFA_RAW.glob("players_*.csv")):
         year = 2000 + int(path.stem.split("_")[-1])

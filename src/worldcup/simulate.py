@@ -1,17 +1,4 @@
-"""Monte-Carlo bracket simulation for round-advancement and title odds.
-
-Given the fitted match model, the actual group draw (pre-tournament known) and
-the standard 32-team bracket, simulate the tournament many times:
-
-* Group stage -- round-robin; sample each match outcome from the model's 1X2
-  probabilities, award 3/1/0, rank by points with an Elo-strength tiebreak,
-  top two advance.
-* Knockout -- a draw cannot stand, so P(team advances) = P(win) + 0.5 * P(draw)
-  (extra time / penalties modelled as a coin flip).
-
-Pairwise probabilities are precomputed once (32x32) so each simulation is
-cheap. Output is per-team probability of reaching each round and winning.
-"""
+"""Monte-Carlo bracket simulation for round-advancement and title odds."""
 
 from __future__ import annotations
 
@@ -62,12 +49,13 @@ def _pairwise_probs(model, teams, tbl, elo_at_start, host) -> dict:
     return {k: P[i] for i, k in enumerate(keys)}
 
 
-def simulate(wc_year: int, model, n_sims: int = 20000, seed: int = 7) -> pd.DataFrame:
+def simulate(wc_year: int, model, n_sims: int = 20000, seed: int = 7,
+             strength_table: pd.DataFrame | None = None) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     tid = f"WC-{wc_year}"
     tours = load_tournaments().set_index("tournament_id")
     start, host = tours.loc[tid, "start_date"], str(tours.loc[tid, "host_country"])
-    tbl = _edition_table(C.active_edition(start))
+    tbl = strength_table if strength_table is not None else _edition_table(C.active_edition(start))
     elo_at_start = ratings_as_of(compute_elo(load_intl_results()), start)
 
     groups = _group_membership(wc_year)
