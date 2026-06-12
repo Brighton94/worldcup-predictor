@@ -1,0 +1,26 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.ipynb_checkpoints/
+
+# Cache
+.cache/
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# FIFA / EA FC player ratings: large and Kaggle-licensed, do not commit.
+# See data/raw/fifa/README.md for how to obtain them.
+data/raw/fifa/
+
+# Keep processed results tracked (they are the shareable output), but ignore
+# any local scratch CSV/PNG you do not intend to publish:
+# _processed_outputs/worldcup/scratch_*
+_build_nb.py

@@ -1,0 +1,9 @@
+feature,question,verdict,evidence
+EA FC squad strength,Beats Elo-only?,WORKED,log-loss 1.011 vs 1.032 (2022)
+Recent form (24m ppg),Adds beyond Elo?,NO,pearson +0.09 vs Elo +0.52
+Confederation (CAF) flag,Helps African teams?,NO (noise),"log-loss change +0.015 (2018), -0.007 (2022)"
+Confirmed 26-man squads,Changes favourites?,MATTERS,deep nations fall below nationality proxy
+Sigmoid calibration,Better than isotonic?,SIGMOID,isotonic 2.14 log-loss in 2018 (draw p -> 0)
+Defensive tilt,Wins titles beyond quality?,NO,tilt r=-0.10 (ns)
+Continental form,Predicts the World Cup?,NO,pearson near zero
+Host advantage,Apply to non-hosts?,HOSTS ONLY,home edge only for host nations

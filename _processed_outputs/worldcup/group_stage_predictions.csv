@@ -1,0 +1,73 @@
+group,date,home,away,p_home,p_draw,p_away,prediction,confidence
+A,2026-06-11,Mexico,South Africa,0.69,0.228,0.082,Mexico win,0.69
+A,2026-06-11,South Korea,Czechia,0.365,0.263,0.373,Draw,0.26
+A,2026-06-18,Czechia,South Africa,0.625,0.241,0.135,Czechia win,0.62
+A,2026-06-18,Mexico,South Korea,0.491,0.258,0.251,Mexico win,0.49
+A,2026-06-24,Mexico,Czechia,0.488,0.258,0.255,Mexico win,0.49
+A,2026-06-24,South Africa,South Korea,0.137,0.241,0.622,South Korea win,0.62
+B,2026-06-12,Canada,Bosnia and Herzegovina,0.604,0.244,0.152,Canada win,0.6
+B,2026-06-13,Qatar,Switzerland,0.087,0.23,0.683,Switzerland win,0.68
+B,2026-06-18,Switzerland,Bosnia and Herzegovina,0.584,0.247,0.168,Switzerland win,0.58
+B,2026-06-18,Canada,Qatar,0.695,0.227,0.078,Canada win,0.69
+B,2026-06-24,Canada,Switzerland,0.395,0.262,0.342,Canada win,0.4
+B,2026-06-24,Bosnia and Herzegovina,Qatar,0.525,0.254,0.22,Bosnia and Herzegovina win,0.53
+C,2026-06-13,Brazil,Morocco,0.544,0.252,0.204,Brazil win,0.54
+C,2026-06-13,Haiti,Scotland,0.113,0.236,0.651,Scotland win,0.65
+C,2026-06-19,Scotland,Morocco,0.224,0.255,0.522,Morocco win,0.52
+C,2026-06-19,Brazil,Haiti,0.764,0.209,0.027,Brazil win,0.76
+C,2026-06-24,Scotland,Brazil,0.11,0.235,0.655,Brazil win,0.66
+C,2026-06-24,Morocco,Haiti,0.721,0.221,0.058,Morocco win,0.72
+D,2026-06-12,United States,Paraguay,0.535,0.253,0.211,United States win,0.54
+D,2026-06-13,Australia,Turkey,0.177,0.249,0.574,Turkey win,0.57
+D,2026-06-19,United States,Australia,0.601,0.245,0.154,United States win,0.6
+D,2026-06-19,Turkey,Paraguay,0.503,0.257,0.241,Turkey win,0.5
+D,2026-06-25,United States,Turkey,0.405,0.262,0.333,United States win,0.41
+D,2026-06-25,Paraguay,Australia,0.451,0.26,0.288,Paraguay win,0.45
+E,2026-06-14,Germany,Curaçao,0.767,0.208,0.025,Germany win,0.77
+E,2026-06-14,Ivory Coast,Ecuador,0.389,0.262,0.348,Draw,0.26
+E,2026-06-20,Germany,Ivory Coast,0.587,0.247,0.166,Germany win,0.59
+E,2026-06-20,Ecuador,Curaçao,0.699,0.226,0.075,Ecuador win,0.7
+E,2026-06-25,Curaçao,Ivory Coast,0.069,0.224,0.707,Ivory Coast win,0.71
+E,2026-06-25,Ecuador,Germany,0.153,0.245,0.602,Germany win,0.6
+F,2026-06-14,Netherlands,Japan,0.503,0.257,0.241,Netherlands win,0.5
+F,2026-06-14,Sweden,Tunisia,0.543,0.253,0.204,Sweden win,0.54
+F,2026-06-20,Netherlands,Sweden,0.561,0.25,0.188,Netherlands win,0.56
+F,2026-06-20,Tunisia,Japan,0.158,0.245,0.597,Japan win,0.6
+F,2026-06-25,Japan,Sweden,0.436,0.261,0.303,Japan win,0.44
+F,2026-06-25,Tunisia,Netherlands,0.091,0.23,0.679,Netherlands win,0.68
+G,2026-06-15,Belgium,Egypt,0.573,0.249,0.179,Belgium win,0.57
+G,2026-06-15,Iran,New Zealand,0.477,0.259,0.264,Iran win,0.48
+G,2026-06-21,Belgium,Iran,0.633,0.239,0.127,Belgium win,0.63
+G,2026-06-21,New Zealand,Egypt,0.195,0.251,0.554,Egypt win,0.55
+G,2026-06-26,Egypt,Iran,0.454,0.26,0.286,Egypt win,0.45
+G,2026-06-26,New Zealand,Belgium,0.081,0.228,0.691,Belgium win,0.69
+H,2026-06-15,Spain,Cape Verde,0.755,0.212,0.033,Spain win,0.76
+H,2026-06-15,Saudi Arabia,Uruguay,0.108,0.235,0.658,Uruguay win,0.66
+H,2026-06-21,Spain,Saudi Arabia,0.752,0.212,0.035,Spain win,0.75
+H,2026-06-21,Uruguay,Cape Verde,0.665,0.233,0.102,Uruguay win,0.67
+H,2026-06-26,Cape Verde,Saudi Arabia,0.355,0.263,0.382,Draw,0.26
+H,2026-06-26,Uruguay,Spain,0.149,0.244,0.607,Spain win,0.61
+I,2026-06-16,France,Senegal,0.635,0.239,0.126,France win,0.64
+I,2026-06-16,Iraq,Norway,0.102,0.233,0.665,Norway win,0.67
+I,2026-06-22,France,Iraq,0.76,0.21,0.03,France win,0.76
+I,2026-06-22,Norway,Senegal,0.386,0.262,0.351,Draw,0.26
+I,2026-06-26,Norway,France,0.135,0.241,0.624,France win,0.62
+I,2026-06-26,Senegal,Iraq,0.655,0.235,0.11,Senegal win,0.66
+J,2026-06-16,Argentina,Algeria,0.649,0.237,0.115,Argentina win,0.65
+J,2026-06-16,Austria,Jordan,0.647,0.237,0.116,Austria win,0.65
+J,2026-06-22,Argentina,Austria,0.653,0.236,0.111,Argentina win,0.65
+J,2026-06-22,Jordan,Algeria,0.113,0.236,0.651,Algeria win,0.65
+J,2026-06-27,Algeria,Austria,0.376,0.263,0.362,Draw,0.26
+J,2026-06-27,Jordan,Argentina,0.028,0.209,0.762,Argentina win,0.76
+K,2026-06-17,Portugal,Congo DR,0.679,0.23,0.091,Portugal win,0.68
+K,2026-06-17,Uzbekistan,Colombia,0.075,0.226,0.698,Colombia win,0.7
+K,2026-06-23,Portugal,Uzbekistan,0.743,0.215,0.042,Portugal win,0.74
+K,2026-06-23,Colombia,Congo DR,0.596,0.246,0.159,Colombia win,0.6
+K,2026-06-27,Colombia,Portugal,0.24,0.257,0.504,Portugal win,0.5
+K,2026-06-27,Congo DR,Uzbekistan,0.542,0.253,0.205,Congo DR win,0.54
+L,2026-06-17,England,Croatia,0.552,0.252,0.197,England win,0.55
+L,2026-06-17,Ghana,Panama,0.45,0.26,0.29,Ghana win,0.45
+L,2026-06-23,England,Ghana,0.711,0.223,0.066,England win,0.71
+L,2026-06-23,Panama,Croatia,0.105,0.234,0.661,Croatia win,0.66
+L,2026-06-27,Panama,England,0.047,0.217,0.737,England win,0.74
+L,2026-06-27,Croatia,Ghana,0.611,0.243,0.146,Croatia win,0.61

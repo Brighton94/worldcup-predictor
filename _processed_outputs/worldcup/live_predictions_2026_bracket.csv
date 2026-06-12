@@ -1,0 +1,32 @@
+round,match,team_a,team_b,predicted_winner
+Round of 32,73,South Korea,Switzerland,Switzerland
+Round of 32,74,Germany,Paraguay,Germany
+Round of 32,75,Netherlands,Morocco,Netherlands
+Round of 32,76,Brazil,Japan,Brazil
+Round of 32,77,France,Sweden,France
+Round of 32,78,Ivory Coast,Norway,Norway
+Round of 32,79,Mexico,Scotland,Mexico
+Round of 32,80,England,Senegal,England
+Round of 32,81,United States,Algeria,United States
+Round of 32,82,Belgium,Czechia,Belgium
+Round of 32,83,Colombia,Croatia,Colombia
+Round of 32,84,Spain,Austria,Spain
+Round of 32,85,Canada,Iran,Canada
+Round of 32,86,Argentina,Uruguay,Argentina
+Round of 32,87,Portugal,Ecuador,Portugal
+Round of 32,88,Turkey,Egypt,Turkey
+Round of 16,89,Germany,France,France
+Round of 16,90,Switzerland,Netherlands,Netherlands
+Round of 16,91,Brazil,Norway,Brazil
+Round of 16,92,Mexico,England,England
+Round of 16,93,Colombia,Spain,Spain
+Round of 16,94,United States,Belgium,Belgium
+Round of 16,95,Argentina,Turkey,Argentina
+Round of 16,96,Canada,Portugal,Portugal
+Quarter-final,97,France,Netherlands,France
+Quarter-final,98,Spain,Belgium,Spain
+Quarter-final,99,Brazil,England,England
+Quarter-final,100,Argentina,Portugal,Argentina
+Semi-final,101,France,Spain,Spain
+Semi-final,102,England,Argentina,Argentina
+Final,104,Spain,Argentina,Spain
