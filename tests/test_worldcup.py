@@ -52,6 +52,24 @@ def test_symmetrize_flips_label_and_negates_features():
     assert list(mirror["y"]) == [_FLIP_Y[0], _FLIP_Y[2]]  # H<->A, D fixed
 
 
+def test_symmetrize_preserves_draws_and_flip_is_self_inverse():
+    # A draw (y=1) must mirror to a draw, and every listed feature - including
+    # home_field - must be negated. Mirroring is its own inverse for the label:
+    # swapping home/away twice returns the original outcome.
+    df = pd.DataFrame({
+        "date": pd.to_datetime(["2021-03-01", "2021-03-02", "2021-03-03"]),
+        "d_elo": [80.0, 0.0, -40.0],
+        "home_field": [1.0, 1.0, 1.0],
+        "y": [0, 1, 2],
+    })
+    feats = ["d_elo", "home_field"]
+    mirror = symmetrize(df, feats).iloc[len(df):].reset_index(drop=True)
+
+    assert mirror.loc[1, "y"] == 1  # draw stays a draw
+    assert list(mirror["home_field"]) == [-1.0, -1.0, -1.0]  # home edge flips sides
+    assert all(_FLIP_Y[_FLIP_Y[k]] == k for k in _FLIP_Y)  # H<->A symmetric, D fixed
+
+
 # data-dependent tests
 
 
