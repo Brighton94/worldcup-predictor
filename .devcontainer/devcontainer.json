@@ -8,6 +8,7 @@
 		}
 	},
 	"workspaceFolder": "/workspace",
+	"forwardPorts": [8888],
 	"mounts": [
 		"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/.codex,target=/home/vscode/.codex,type=bind"
