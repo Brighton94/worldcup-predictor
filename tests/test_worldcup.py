@@ -22,7 +22,7 @@ _HAS_DATA = (C.WC_RAW / "matches.csv").exists() and any(C.FIFA_RAW.glob("players
 needs_data = pytest.mark.skipif(not _HAS_DATA, reason="raw datasets not present")
 
 
-# ── pure-logic tests (no data) ───────────────────────────────────────
+# pure-logic tests (no data)
 
 
 def test_active_edition_maps_to_pre_tournament_release():
@@ -52,7 +52,7 @@ def test_symmetrize_flips_label_and_negates_features():
     assert list(mirror["y"]) == [_FLIP_Y[0], _FLIP_Y[2]]  # H<->A, D fixed
 
 
-# ── data-dependent tests ─────────────────────────────────────────────
+# data-dependent tests
 
 
 @needs_data
