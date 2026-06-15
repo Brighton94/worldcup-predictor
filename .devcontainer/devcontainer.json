@@ -1,24 +1,44 @@
 {
-  "name": "World Cup Model",
-  "build": { "dockerfile": "Dockerfile", "context": ".." },
-  "workspaceFolder": "/workspace",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-  "remoteUser": "vscode",
-  "postCreateCommand": "pip install --user -e .[dev] && pip install --user nbconvert",
-  "forwardPorts": [8888],
-  "remoteEnv": {
-    "PYTHONPATH": "/workspace"
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-toolsai.jupyter"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.testing.pytestEnabled": true
-      }
-    }
-  }
+	"name": "World Cup Predictors",
+	"build": {
+		"dockerfile": "./Dockerfile",
+		"context": "..",
+		"args": {
+			"USERNAME": "vscode"
+		}
+	},
+	"workspaceFolder": "/workspace",
+	"mounts": [
+		"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.codex,target=/home/vscode/.codex,type=bind"
+	],
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"editor.defaultFormatter": "charliermarsh.ruff",
+				"editor.formatOnSave": true,
+				"editor.codeActionsOnSave": {
+					"source.organizeImports": "explicit",
+					"source.fixAll": "explicit"
+				},
+				"python.testing.pytestEnabled": true,
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"terminal.integrated.defaultProfile.linux": "bash"
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter",
+				"charliermarsh.ruff",
+				"streetsidesoftware.code-spell-checker",
+				"inferrinizzard.prettier-sql-vscode",
+				"GitHub.copilot",
+				"openai.chatgpt",
+				"anthropic.claude-code",
+				"mechatroner.rainbow-csv"
+			]
+		}
+	},
+	"postCreateCommand": "pip install -e .[dev] && pre-commit install",
+	"remoteUser": "vscode"
 }
+
