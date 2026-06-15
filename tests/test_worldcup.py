@@ -70,6 +70,16 @@ def test_symmetrize_preserves_draws_and_flip_is_self_inverse():
     assert all(_FLIP_Y[_FLIP_Y[k]] == k for k in _FLIP_Y)  # H<->A symmetric, D fixed
 
 
+def test_canon_passthrough_and_idempotent():
+    # Names absent from the alias tables pass through unchanged, and the
+    # canonical form is a fixed point - applying the mapping twice is a no-op.
+    # This catches an alias whose value is itself another alias key.
+    assert C.canon_fifa("Brazil") == "Brazil"
+    assert C.canon_intl("Brazil") == "Brazil"
+    assert C.canon_fifa(C.canon_fifa("Korea Republic")) == "South Korea"
+    assert C.canon_intl(C.canon_intl("Czech Republic")) == "Czechia"
+
+
 # data-dependent tests
 
 
