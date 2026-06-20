@@ -113,9 +113,11 @@ def build_wc_test(wc_year: int, results_elo: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def build_dataset(wc_year: int) -> dict:
+def build_dataset(wc_year: int, xg_blend: float = 0.0) -> dict:
     """Backbone (train) + World Cup (test) for a target tournament."""
-    results_elo = compute_elo(load_intl_results())
+    from .xg import load_xg_lookup
+    xg_lookup = load_xg_lookup() if xg_blend else None
+    results_elo = compute_elo(load_intl_results(), xg_lookup=xg_lookup, xg_blend=xg_blend)
     tours = load_tournaments().set_index("tournament_id")
     start = tours.loc[f"WC-{wc_year}", "start_date"]
     train = build_backbone(start, results_elo)

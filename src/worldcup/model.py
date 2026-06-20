@@ -64,9 +64,9 @@ def _metrics(name: str, proba: np.ndarray, y: np.ndarray) -> dict:
     }
 
 
-def train_eval(wc_year: int, calibrate: bool = True) -> dict:
+def train_eval(wc_year: int, calibrate: bool = True, xg_blend: float = 0.0) -> dict:
     """Train on pre-tournament data, evaluate on the World Cup."""
-    data = build_dataset(wc_year)
+    data = build_dataset(wc_year, xg_blend=xg_blend)
     train, test = data["train"], data["test"]
     yte = test["y"].to_numpy()
 

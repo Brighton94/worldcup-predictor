@@ -36,7 +36,17 @@ def _goal_mult(margin: int) -> float:
     return (11.0 + margin) / 8.0
 
 
-def compute_elo(results: pd.DataFrame) -> pd.DataFrame:
+def _xg_target(date, t1, t2, w1, xg_lookup, xg_blend):
+    """Blend the goal result toward the xG share when xG exists for the match."""
+    m = xg_lookup.get((pd.Timestamp(date).normalize(), frozenset({t1, t2})))
+    if not m or t1 not in m or t2 not in m:
+        return w1
+    tot = m[t1] + m[t2]
+    return (1.0 - xg_blend) * w1 + xg_blend * (m[t1] / tot) if tot > 0 else w1
+
+
+def compute_elo(results: pd.DataFrame, xg_lookup: dict | None = None,
+                xg_blend: float = 0.0) -> pd.DataFrame:
     """Return ``results`` with pre-match Elo columns for both teams."""
     rating: dict[str, float] = defaultdict(lambda: INIT_ELO)
     e1_pre, e2_pre, ediff, eprob = [], [], [], []
@@ -60,6 +70,8 @@ def compute_elo(results: pd.DataFrame) -> pd.DataFrame:
             w1 = 0.0
         else:
             w1 = 0.5
+        if xg_blend and xg_lookup:
+            w1 = _xg_target(row.date, t1, t2, w1, xg_lookup, xg_blend)
         margin = int(abs(row.home_score - row.away_score))
         k = _k_importance(row.tournament) * _goal_mult(margin)
         delta = k * (w1 - we1)
@@ -74,7 +86,8 @@ def compute_elo(results: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def ratings_as_of(results_with_elo: pd.DataFrame, date: pd.Timestamp) -> dict[str, float]:
+def ratings_as_of(results_with_elo: pd.DataFrame, date: pd.Timestamp,
+                  xg_lookup: dict | None = None, xg_blend: float = 0.0) -> dict[str, float]:
     """Each team's most recent pre-match rating strictly before ``date``."""
     prior = results_with_elo[results_with_elo["date"] < date]
     latest: dict[str, float] = {}
@@ -91,6 +104,8 @@ def ratings_as_of(results_with_elo: pd.DataFrame, date: pd.Timestamp) -> dict[st
             w1 = 0.0
         else:
             w1 = 0.5
+        if xg_blend and xg_lookup:
+            w1 = _xg_target(row.date, row.team1, row.team2, w1, xg_lookup, xg_blend)
         margin = int(abs(row.home_score - row.away_score))
         k = _k_importance(row.tournament) * _goal_mult(margin)
         delta = k * (w1 - we1)

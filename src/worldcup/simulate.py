@@ -50,13 +50,16 @@ def _pairwise_probs(model, teams, tbl, elo_at_start, host) -> dict:
 
 
 def simulate(wc_year: int, model, n_sims: int = 20000, seed: int = 7,
-             strength_table: pd.DataFrame | None = None) -> pd.DataFrame:
+             strength_table: pd.DataFrame | None = None, xg_blend: float = 0.0) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     tid = f"WC-{wc_year}"
     tours = load_tournaments().set_index("tournament_id")
     start, host = tours.loc[tid, "start_date"], str(tours.loc[tid, "host_country"])
     tbl = strength_table if strength_table is not None else _edition_table(C.active_edition(start))
-    elo_at_start = ratings_as_of(compute_elo(load_intl_results()), start)
+    from .xg import load_xg_lookup
+    xg_lookup = load_xg_lookup() if xg_blend else None
+    results_elo = compute_elo(load_intl_results(), xg_lookup=xg_lookup, xg_blend=xg_blend)
+    elo_at_start = ratings_as_of(results_elo, start, xg_lookup=xg_lookup, xg_blend=xg_blend)
 
     groups = _group_membership(wc_year)
     teams = [t for g in groups.values() for t in g]

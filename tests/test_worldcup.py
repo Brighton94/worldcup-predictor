@@ -122,3 +122,19 @@ def test_wc_test_set_is_complete_and_clean():
     assert len(test) == 64  # all 2022 matches covered (Qatar imputed)
     assert not test[FEATURES].isna().any().any()
     assert set(test["y"].unique()).issubset({0, 1, 2})
+
+
+@needs_data
+def test_xg_lookup_joins_and_blend_shifts_ratings():
+    from src.worldcup.xg import load_xg_lookup
+    from src.worldcup.data import load_intl_results
+    lk = load_xg_lookup()
+    if not lk:  # statsbomb csv is optional
+        pytest.skip("no statsbomb xG data present")
+    res = load_intl_results().assign(d=lambda x: x["date"].dt.normalize())
+    hits = sum((r.d, frozenset({r.team1, r.team2})) in lk for r in res.itertuples())
+    assert hits > 200  # most tournament matches join by date and teams
+    # blending xG into the target must actually move some ratings
+    base = compute_elo(res)
+    blended = compute_elo(res, xg_lookup=lk, xg_blend=1.0)
+    assert not np.allclose(base["elo1_pre"], blended["elo1_pre"])
