@@ -6,10 +6,11 @@ import json
 import unicodedata
 
 import pandas as pd
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz
 
 from . import config as C
 from .features import _STRENGTH, edition_table_filled
+from .team_strength import matchday_mean
 from .worldcup2026 import EDITION_2026
 
 # football-data.org team-name spellings -> the model's canonical names
@@ -22,7 +23,6 @@ def canon(name: str) -> str:
 
 WC_TEAMS_FILE = C.RAW / "footballdata_api" / "WC_teams.json"
 MIN_MATCHED = 14          # below this, fall back to the nationality-pool proxy
-FUZZY_CUTOFF = 80
 
 # canonical team -> EA FC 26 "Nation" spelling (only where it differs)
 _EA_NATION = {
@@ -37,10 +37,43 @@ def _norm(s: str) -> str:
     return " ".join(s.replace(".", " ").replace("-", " ").split())
 
 
-# Squad players missing from EA FC 26 entirely, rated manually so they are not dropped.
+# Manual rating overrides: players EA FC 26 omits, plus deliberate rating choices.
+# The matcher prefers the higher overall, so a manual entry overrides a weaker EA one.
 _MANUAL_RATINGS = {
     "Netherlands": [("Memphis Depay", 84)],
+    "Argentina": [("Lionel Messi", 91), ("José Manuel López", 78)],  # Messi at his FIFA 23 peak
+    "Brazil": [("Neymar", 83)],
+    "Colombia": [("James Rodríguez", 79)],
+    "Ecuador": [("Enner Valencia", 75)],
+    "Paraguay": [("Gustavo Gómez", 80)],
 }
+
+# Stars EA FC 26 lists under a very different string; map the squad name to the exact EA "Name".
+_NAME_ALIAS = {
+    "Spain": {"pablo gavira": "Gavi"},
+    "Brazil": {"vinicius junior": "Vini Jr.", "alisson becker": "Alisson"},
+    "Ivory Coast": {"amad diallo": "Amad", "evan n'dicka": "Evan Ndicka"},
+    "Switzerland": {"ardon jasari": "Ardon Jashari"},
+    "England": {"valentino livramento": "Tino Livramento"},
+    "Ecuador": {"ray paez": "Kendry Páez"},
+}
+
+
+def _accept(s_tok: list[str], e_tok: list[str]) -> bool:
+    """True if a squad name and an EA name plausibly refer to the same player.
+
+    Accepts mononyms and dropped middle names (token subset either way), and
+    same-surname pairs only when the first names are compatible. This rejects
+    same-surname namesakes (e.g. James -> Nicolas Rodriguez) instead of
+    silently inserting the wrong, usually low, overall.
+    """
+    ss, es = set(s_tok), set(e_tok)
+    if ss <= es or es <= ss:
+        return True
+    if s_tok[-1] == e_tok[-1]:
+        a, b = s_tok[0], e_tok[0]
+        return a.startswith(b) or b.startswith(a) or fuzz.ratio(a, b) >= 70
+    return False
 
 
 def _group(position: str) -> str:
@@ -89,6 +122,7 @@ def _strength_from_players(players: list[tuple[float, str]]) -> dict:
     gks = [o for o, gg in players if gg == "GK"]
     return {
         "ovr_top23": sum(ov[:23]) / len(ov[:23]),
+        "ovr_top16": matchday_mean(players),
         "ovr_top11": best_xi(11, max_gk=1),
         "ovr_top3": sum(ov[:3]) / len(ov[:3]),
         "gk": max(gks) if gks else float("nan"),
@@ -113,24 +147,25 @@ def confirmed_strength_table():
         if len(cand) >= 5:
             names = cand["_n"].tolist()
             ovr = cand["OVR"].tolist()
+            raw = cand["Name"].tolist()
             for nm, o in _MANUAL_RATINGS.get(team, []):          # supply players EA FC omits
-                names.append(_norm(nm)); ovr.append(float(o))
-            surn = [n.split()[-1] if n else "" for n in names]   # EA surnames
+                names.append(_norm(nm)); ovr.append(float(o)); raw.append(nm)
+            alias = _NAME_ALIAS.get(team, {})
             for name, pos in players:
                 pn = _norm(name)
                 if not pn:
                     continue
-                # exact surname match, disambiguated by best full-name similarity.
-                sn = pn.split()[-1]
-                same = [i for i, s in enumerate(surn) if s == sn]
-                if same:
-                    i = max(same, key=lambda i: fuzz.token_set_ratio(pn, names[i]))
-                    matched.append((float(ovr[i]), _group(pos)))
+                if pn in alias:                                  # curated fix to a known EA entry
+                    idx = [i for i, r in enumerate(raw) if r == alias[pn]]
+                    if idx:
+                        i = max(idx, key=lambda i: ovr[i])
+                        matched.append((float(ovr[i]), _group(pos)))
                     continue
-                # 2) token-set fuzzy fallback (subset-tolerant)
-                hit = process.extractOne(pn, names, scorer=fuzz.token_set_ratio)
-                if hit and hit[1] >= FUZZY_CUTOFF:
-                    matched.append((float(ovr[hit[2]]), _group(pos)))
+                st = pn.split()
+                keep = [i for i, n in enumerate(names) if n and _accept(st, n.split())]
+                if keep:                                         # best name match, then higher overall
+                    i = max(keep, key=lambda i: (fuzz.token_sort_ratio(pn, names[i]), ovr[i]))
+                    matched.append((float(ovr[i]), _group(pos)))
         if len(matched) >= MIN_MATCHED:
             s = _strength_from_players(matched)
             # backfill any NaN position columns from the proxy row

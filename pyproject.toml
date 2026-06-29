@@ -20,6 +20,7 @@ dependencies = [
     "ipykernel>=6.29.0",
 
     "scikit-learn>=1.4.0",
+    "xgboost>=2.0.0",
     "rapidfuzz>=3.0.0",
     "cairosvg>=2.7.0",
 ]

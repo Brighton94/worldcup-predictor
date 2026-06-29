@@ -13,8 +13,8 @@ from .elo import compute_elo, ratings_as_of
 from .team_strength import _edition_strength
 from .data import load_fifa_players
 
-# strength columns differenced into features
-_STRENGTH = ["ovr_top23", "ovr_top11", "ovr_top3", "gk", "def_top", "mid_top",
+# strength columns differenced into features (ovr_top16 = best XI + 5 impact subs)
+_STRENGTH = ["ovr_top16", "ovr_top11", "ovr_top3", "gk", "def_top", "mid_top",
              "att_top", "depth80"]
 FEATURES = ["d_elo", "home_field"] + [f"d_{c}" for c in _STRENGTH]
 

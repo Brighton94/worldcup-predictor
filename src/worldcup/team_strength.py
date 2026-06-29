@@ -23,6 +23,33 @@ def _primary_group(player_positions: str) -> str:
     return _POS_GROUP.get(first, "MID")
 
 
+# matchday squad: best XI (<=1 GK) plus impact subs by position
+_SUBS = (("DEF", 1), ("MID", 2), ("ATT", 2))
+
+
+def matchday_mean(ovr_grp: list[tuple[float, str]], n_xi: int = 11, max_gk: int = 1) -> float:
+    """Mean overall of the best XI plus the best _SUBS by position (a 16-man matchday)."""
+    order = sorted(range(len(ovr_grp)), key=lambda i: -ovr_grp[i][0])
+    chosen, used, gk = [], set(), 0
+    for i in order:
+        if ovr_grp[i][1] == "GK":
+            if gk >= max_gk:
+                continue
+            gk += 1
+        chosen.append(i); used.add(i)
+        if len(chosen) == n_xi:
+            break
+    for grp, k in _SUBS:
+        c = 0
+        for i in order:
+            if i in used or ovr_grp[i][1] != grp:
+                continue
+            chosen.append(i); used.add(i); c += 1
+            if c == k:
+                break
+    return float(sum(ovr_grp[i][0] for i in chosen) / len(chosen)) if chosen else float("nan")
+
+
 def _edition_strength(players: pd.DataFrame) -> pd.DataFrame:
     """Strength features per nationality for one FIFA edition."""
     df = players.copy()
@@ -40,6 +67,7 @@ def _edition_strength(players: pd.DataFrame) -> pd.DataFrame:
         rows.append({
             "nationality": nat,
             "ovr_top23": float(squad["overall"].mean()),
+            "ovr_top16": matchday_mean(list(zip(g["overall"], g["group"], strict=False))),
             "ovr_top11": float(best11["overall"].mean()),
             "ovr_max": float(g["overall"].max()),
             "ovr_top3": float(g["overall"].head(3).mean()),

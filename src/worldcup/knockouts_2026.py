@@ -15,7 +15,7 @@ import pandas as pd
 from . import config as C
 from .data import load_intl_results
 from .elo import compute_elo, ratings_as_of
-from .model import train_eval
+from .model_zoo import fit_for_2026
 from .squads import confirmed_strength_table
 from .worldcup2026 import pairwise_probs, R16, QF, SF, FINAL
 from .run_2026 import _bracket_rows
@@ -71,31 +71,45 @@ def simulate_from_r32(r32, model, tbl, elo, n_sims=20000, seed=7):
     return {"bracket": bracket, "sim": sim}
 
 
-def run(n_sims=20000, date_label="28 June 2026"):
-    model = train_eval(2022)["model"]
+def run(n_sims=20000, date_label="29 June 2026", model_name="random_forest",
+        out_stem="knockouts_2026", subtitle_text=None):
+    """Forecast and render the bracket with ``model_name`` (see model_zoo.model_specs)."""
+    model = fit_for_2026(model_name)
     elo = ratings_as_of(compute_elo(load_intl_results()), WC_2026_START)
     tbl, _ = confirmed_strength_table()
     res = simulate_from_r32(R32_2026, model, tbl, elo, n_sims=n_sims)
 
-    _bracket_rows(res["bracket"]).to_csv(C.OUT / "knockouts_2026_bracket.csv", index=False)
-    res["sim"].to_csv(C.OUT / "knockouts_2026_simulation.csv", index=False)
+    bracket_csv = C.OUT / f"{out_stem}_bracket.csv"
+    sim_csv = C.OUT / f"{out_stem}_simulation.csv"
+    _bracket_rows(res["bracket"]).to_csv(bracket_csv, index=False)
+    res["sim"].to_csv(sim_csv, index=False)
+    if subtitle_text is None:
+        subtitle_text = (f"A machine-learning forecast ({model_name}) from the confirmed "
+                         "Round of 32. Bracket per FIFA.")
     svg = build_poster(date_label, "@brighton_nkomo_",
-                       bracket_csv=C.OUT / "knockouts_2026_bracket.csv",
-                       sim_csv=C.OUT / "knockouts_2026_simulation.csv",
+                       bracket_csv=bracket_csv, sim_csv=sim_csv,
                        title_text="World Cup 2026: Predicted Knockout Bracket",
-                       subtitle_text="A machine-learning forecast from the confirmed Round of 32. Bracket per FIFA.",
+                       subtitle_text=subtitle_text,
                        pill_note="before the knockout matches")
     cairosvg.svg2png(bytestring=svg.encode("utf-8"),
-                     write_to=str(C.OUT / "knockouts_2026.png"), output_width=2800)
+                     write_to=str(C.OUT / f"{out_stem}.png"), output_width=2800)
     return res
 
 
+# (model_name, output stem, why this bracket) - the headline plus the "surprise" alternative
+_BRACKETS = (
+    ("random_forest", "knockouts_2026", "best held-out log-loss"),
+    ("logreg", "knockouts_2026_surprise", "most upset picks"),
+)
+
+
 def main():
-    res = run()
-    b = res["bracket"]
-    print(f"champion: {b[104][2]} | final: {b[101][2]} vs {b[102][2]}")
-    print(res["sim"].head(8)[["team", "Champion"]].to_string(index=False))
-    print("wrote knockouts_2026.png + CSVs to", C.OUT)
+    for model_name, out_stem, note in _BRACKETS:
+        res = run(model_name=model_name, out_stem=out_stem)
+        b = res["bracket"]
+        print(f"[{model_name}: {note}] champion {b[104][2]} | "
+              f"final {b[101][2]} vs {b[102][2]} -> {out_stem}.png")
+    print("wrote bracket posters + CSVs to", C.OUT)
 
 
 if __name__ == "__main__":

@@ -66,7 +66,6 @@ pip install -e .[dev]
 python -m src.worldcup.run            # backtest the 2018 and 2022 World Cups
 python -m src.worldcup.run_2026       # forecast the 48-team 2026 bracket
 python -m src.worldcup.live           # fold in played 2026 results, re-forecast
-python -m src.worldcup.defense_study  # the "does defence win titles" study
 
 # Checks
 pytest                                 # run the unit tests
