@@ -48,8 +48,12 @@ def _fit(train: pd.DataFrame, feats: list[str], calibrate: bool):
     fit_part, cal_part = train.iloc[:cut], train.iloc[cut:]
     sym = symmetrize(fit_part, feats)
     base.fit(sym[feats], sym["y"])
-    # Sigmoid (Platt) calibration: keeps probabilities in (0,1) and avoids isotonic collapsing the draw class on small test sets.
-    cal = CalibratedClassifierCV(base, method="sigmoid", cv="prefit")
+    # Sigmoid (Platt) calibration; sklearn >=1.6 removed cv="prefit" for FrozenEstimator.
+    try:
+        from sklearn.frozen import FrozenEstimator
+        cal = CalibratedClassifierCV(FrozenEstimator(base), method="sigmoid")
+    except ImportError:
+        cal = CalibratedClassifierCV(base, method="sigmoid", cv="prefit")
     cal_sym = symmetrize(cal_part, feats)
     cal.fit(cal_sym[feats], cal_sym["y"])
     return cal
