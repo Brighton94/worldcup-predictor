@@ -37,6 +37,12 @@ def _norm(s: str) -> str:
     return " ".join(s.replace(".", " ").replace("-", " ").split())
 
 
+# Squad players missing from EA FC 26 entirely, rated manually so they are not dropped.
+_MANUAL_RATINGS = {
+    "Netherlands": [("Memphis Depay", 84)],
+}
+
+
 def _group(position: str) -> str:
     p = position.lower()
     if "keeper" in p or p == "gk":
@@ -107,6 +113,8 @@ def confirmed_strength_table():
         if len(cand) >= 5:
             names = cand["_n"].tolist()
             ovr = cand["OVR"].tolist()
+            for nm, o in _MANUAL_RATINGS.get(team, []):          # supply players EA FC omits
+                names.append(_norm(nm)); ovr.append(float(o))
             surn = [n.split()[-1] if n else "" for n in names]   # EA surnames
             for name, pos in players:
                 pn = _norm(name)
