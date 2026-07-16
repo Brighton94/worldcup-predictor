@@ -17,6 +17,15 @@ right 58% of the time but overconfident. Every metric is reported on a
 temporally-correct split (train on the past, test on a later tournament), and no
 feature uses information that would not exist 60 seconds before kickoff.
 
+## How the 2026 forecast did
+
+Scored against the real tournament, the model correctly called:
+
+- 13 of the 16 Round-of-16 teams
+- 5 of the 8 quarter-finalists
+- 4 of the 4 semi-finalists
+- both finalists (Spain and Argentina)
+
 ## What is inside
 
 | Path | Contents |
