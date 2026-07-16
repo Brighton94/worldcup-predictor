@@ -19,12 +19,29 @@ feature uses information that would not exist 60 seconds before kickoff.
 
 ## How the 2026 forecast did
 
-Scored against the real tournament, the model correctly called:
+Scored against the real tournament, the model's bracket calls held up deep into the knockouts:
 
-- 13 of the 16 Round-of-16 teams
-- 5 of the 8 quarter-finalists
-- 4 of the 4 semi-finalists
-- both finalists (Spain and Argentina)
+| Stage | Correct calls | Hit rate |
+| --- | --- | --- |
+| Round of 16 | 13 / 16 | 81% |
+| Quarter-finals | 5 / 8 | 63% |
+| Semi-finals | 4 / 4 (**Argentina**, **England**, **France** & **Spain**) | 100% |
+| Final | 2 / 2 (**Argentina** & **Spain**) | 100% |
+
+**The model was not perfect.** **Uruguay** and **Türkiye** exited earlier than
+projected, while **Germany**, the **Netherlands** and **Colombia** were
+eliminated on penalties, **a high-variance situation either side could have
+won**.
+
+Some matchups also changed because the original bracket was built before the
+group stage. Under FIFA Annex C, the eight best third-placed teams enter
+different knockout positions depending on the final standings.
+
+**African teams produced further surprises because they are underrepresented
+in the EA FC 26 dataset:** **Bafana Bafana** has 14 players, **Egypt** nine
+and **Cabo Verde** ten, with Vozinha missing entirely. Some African players
+are not well scouted, and even where available in FC 26 they are likely to be
+underrated.
 
 ## What is inside
 
